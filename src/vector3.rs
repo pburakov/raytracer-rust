@@ -31,6 +31,8 @@ impl Vector3 {
 impl_op!(+ |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
 impl_op!(+ |a: &Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
 
+impl_op!(+= |a: &mut Vector3, b: Vector3| { a.x+=b.x; a.y+=b.y; a.z+=b.z; });
+
 impl_op!(- |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x-b.x, y: a.y-b.y, z: a.z-b.z} });
 impl_op!(- |a: Vector3, b: &Vector3| -> Vector3 { Vector3 {x: a.x-b.x, y: a.y-b.y, z: a.z-b.z} });
 
