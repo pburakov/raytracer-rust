@@ -14,14 +14,12 @@ pub(crate) trait Hittable {
 }
 
 impl HitRecord {
-    pub(crate) fn from_normal(p: Point3, t: f64, r: &Ray, outward_normal: &Vector3) -> HitRecord {
-        let front_face = r.direction.dot(outward_normal) < 0.0;
-        let normal: Vector3;
-        if front_face {
-            normal = *outward_normal;
+    pub(crate) fn from_normal(p: Point3, t: f64, r: &Ray, outward_normal: Vector3) -> HitRecord {
+        let front_face = r.direction.dot(&outward_normal) < 0.0;
+        return if front_face {
+            HitRecord { p, t, front_face, normal: outward_normal }
         } else {
-            normal = -*outward_normal;
-        }
-        HitRecord { p, t, front_face, normal }
+            HitRecord { p, t, front_face, normal: -outward_normal }
+        };
     }
 }

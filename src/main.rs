@@ -9,7 +9,7 @@ use crate::hittable_list::HittableList;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::util::random;
-use crate::vector3::{Vector3 as Color, Vector3 as Point3};
+use crate::vector3::{Vector3 as Color, Vector3 as Point3, Vector3};
 
 mod ray;
 mod vector3;
@@ -25,6 +25,7 @@ const ASPECT_RATIO: f64 = 16.0 / 9.0;
 const IMAGE_WIDTH: i32 = 400;
 const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
 const SAMPLES_PER_PIXEL: u8 = 100;
+const MAX_DEPTH: u8 = 50;
 
 fn main() {
     // World
@@ -47,7 +48,7 @@ fn main() {
                 let v = (y as f64 + random()) / IMAGE_HEIGHT as f64;
 
                 let r = camera.get_ray(u, v);
-                pixel_color += ray_color(&r, &world);
+                pixel_color += ray_color(&r, &world, MAX_DEPTH);
             }
             write_color(io::stdout(), pixel_color, SAMPLES_PER_PIXEL);
         }
@@ -56,10 +57,15 @@ fn main() {
     io::stderr().write_all(b"\nDone\n").unwrap();
 }
 
-fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
-    let rec = world.hit(r, 0.0, INFINITY);
+fn ray_color(r: &Ray, world: &dyn Hittable, depth: u8) -> Color {
+    let rec = world.hit(r, 0.001, INFINITY);
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if depth <= 0 {
+        return Color::zero();
+    }
     if rec.is_some() {
-        return 0.5 * (rec.unwrap().normal + Color::new(1.0, 1.0, 1.0));
+        let target = rec.unwrap().p + Vector3::random_in_hemisphere(&rec.unwrap().normal);
+        return 0.5 * ray_color(&Ray::new(rec.unwrap().p, target - rec.unwrap().p), world, depth - 1);
     }
     let unit_direction = r.direction.unit();
     let t = 0.5 * (unit_direction.y + 1.0);
