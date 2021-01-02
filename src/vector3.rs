@@ -18,23 +18,29 @@ impl Vector3 {
         self.x * v.x + self.y * v.y + self.z * v.z
     }
     pub fn length(&self) -> f64 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+        self.length_squared().sqrt()
+    }
+    pub fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
     }
     pub fn unit(&self) -> Vector3 {
         *self / self.length()
     }
 }
 
-impl_op!(+ |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z }});
-impl_op!(+ |a: &Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z }});
+impl_op!(+ |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
+impl_op!(+ |a: &Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
 
-impl_op!(- |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x-b.x, y: a.y-b.y, z: a.z-b.z }});
-impl_op!(- |a: Vector3, b: &Vector3| -> Vector3 { Vector3 {x: a.x-b.x, y: a.y-b.y, z: a.z-b.z }});
+impl_op!(- |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x-b.x, y: a.y-b.y, z: a.z-b.z} });
+impl_op!(- |a: Vector3, b: &Vector3| -> Vector3 { Vector3 {x: a.x-b.x, y: a.y-b.y, z: a.z-b.z} });
 
-impl_op!(/ |a: Vector3, t: f64| -> Vector3 { Vector3 {x: a.x/t, y: a.y/t, z: a.z/t }});
+impl_op!(/ |a: Vector3, t: f64| -> Vector3 { Vector3 {x: a.x/t, y: a.y/t, z: a.z/t} });
 
-impl_op!(* |t: f64, a: Vector3| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t }});
-impl_op!(* |t: f64, a: &Vector3| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t }});
+impl_op!(* |t: f64, a: Vector3| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t} });
+impl_op!(* |t: f64, a: &Vector3| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t} });
+
+impl_op!(- |a: Vector3| -> Vector3 { Vector3 {x:-a.x, y:-a.y, z:-a.z} });
+impl_op!(- |a: &Vector3| -> Vector3 { Vector3 {x:-a.x, y:-a.y, z:-a.z} });
 
 #[cfg(test)]
 mod tests {
@@ -50,6 +56,13 @@ mod tests {
         assert_eq!(1.0, Vector3::new(1.0, 0.0, 0.0).length());
         assert_eq!(2.0, Vector3::new(0.0, 2.0, 0.0).length());
         assert_eq!(3.0, Vector3::new(0.0, 0.0, 3.0).length());
+    }
+
+    #[test]
+    fn length_squared() {
+        assert_eq!(1.0, Vector3::new(1.0, 0.0, 0.0).length_squared());
+        assert_eq!(4.0, Vector3::new(0.0, 2.0, 0.0).length_squared());
+        assert_eq!(9.0, Vector3::new(0.0, 0.0, 3.0).length_squared());
     }
 
     #[test]
