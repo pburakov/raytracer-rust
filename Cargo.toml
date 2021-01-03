@@ -1,5 +1,5 @@
 [package]
-name = "rust-playground"
+name = "raytracer"
 version = "0.1.0"
 authors = ["Paul Burakov <pburakov@gmail.com>"]
 edition = "2018"

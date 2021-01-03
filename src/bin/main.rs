@@ -2,23 +2,14 @@ use std::f64::INFINITY;
 use std::io;
 use std::io::Write;
 
-use crate::camera::Camera;
-use crate::color::write_color;
-use crate::hittable::Hittable;
-use crate::material::{Dielectric, Lambertian, Metal};
-use crate::ray::Ray;
-use crate::sphere::Sphere;
-use crate::util::{random_f64, random_range};
-use crate::vector3::{Vector3 as Color, Vector3 as Point3, Vector3};
-
-mod ray;
-mod vector3;
-mod hittable;
-mod sphere;
-mod util;
-mod camera;
-mod color;
-mod material;
+use raytracer::camera::Camera;
+use raytracer::color::write_color;
+use raytracer::hittable::Hittable;
+use raytracer::material::{Dielectric, Lambertian, Metal};
+use raytracer::ray::Ray;
+use raytracer::sphere::Sphere;
+use raytracer::util::{random_f64, random_range};
+use raytracer::vector3::{Vector3 as Color, Vector3 as Point3, Vector3};
 
 // Image
 const ASPECT_RATIO: f64 = 3.0 / 2.0;
@@ -39,13 +30,25 @@ fn main() {
     let dist_to_focus = 10.0;
     let aperture = 0.1;
 
-    let camera = Camera::new(look_from, look_at, v_up, 20.0, ASPECT_RATIO, aperture, dist_to_focus);
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        20.0,
+        ASPECT_RATIO,
+        aperture,
+        dist_to_focus,
+    );
 
     // Render
-    io::stdout().write_fmt(format_args!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT)).unwrap();
+    io::stdout()
+        .write_fmt(format_args!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT))
+        .unwrap();
 
     for y in (0..IMAGE_HEIGHT).rev() {
-        io::stderr().write_fmt(format_args!("\rScanlines remaining: {} ", y)).unwrap();
+        io::stderr()
+            .write_fmt(format_args!("\rScanlines remaining: {} ", y))
+            .unwrap();
 
         for x in 0..IMAGE_WIDTH {
             let mut pixel_color = Color::zero();
@@ -67,12 +70,20 @@ fn random_scene() -> Vec<Box<dyn Hittable>> {
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
     let ground_material = Lambertian::new(Color::new(0.5, 0.5, 0.5));
-    world.push(Box::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_material.clone())));
+    world.push(Box::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        ground_material.clone(),
+    )));
 
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = random_f64();
-            let center = Point3::new(a as f64 + 0.9 * random_f64(), 0.2, b as f64 + 0.9 * random_f64());
+            let center = Point3::new(
+                a as f64 + 0.9 * random_f64(),
+                0.2,
+                b as f64 + 0.9 * random_f64(),
+            );
 
             if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 if choose_mat < 0.8 {
@@ -96,13 +107,25 @@ fn random_scene() -> Vec<Box<dyn Hittable>> {
     }
 
     let material1 = Dielectric::new(1.5);
-    world.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material1)));
+    world.push(Box::new(Sphere::new(
+        Point3::new(0.0, 1.0, 0.0),
+        1.0,
+        material1,
+    )));
 
     let material2 = Lambertian::new(Color::new(0.4, 0.2, 0.1));
-    world.push(Box::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material2)));
+    world.push(Box::new(Sphere::new(
+        Point3::new(-4.0, 1.0, 0.0),
+        1.0,
+        material2,
+    )));
 
     let material3 = Metal::new(Color::new(0.7, 0.6, 0.5), 0.0);
-    world.push(Box::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material3)));
+    world.push(Box::new(Sphere::new(
+        Point3::new(4.0, 1.0, 0.0),
+        1.0,
+        material3,
+    )));
 
     world
 }

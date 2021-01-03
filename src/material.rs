@@ -8,12 +8,18 @@ pub struct ScatterRecord {
 }
 
 pub trait Material {
-    fn scatter(&self, r_in: &Ray, p: &Point, normal: &Vector3, front_face: bool) -> Option<ScatterRecord>;
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        p: &Point,
+        normal: &Vector3,
+        front_face: bool,
+    ) -> Option<ScatterRecord>;
 }
 
 #[derive(Clone)]
 pub struct Lambertian {
-    albedo: Color
+    albedo: Color,
 }
 
 impl Lambertian {
@@ -33,10 +39,12 @@ impl Material for Lambertian {
             scatter_direction = *normal;
         }
         let scattered_ray = Ray::new(*p, scatter_direction);
-        Option::Some(ScatterRecord { attenuation, scattered_ray })
+        Option::Some(ScatterRecord {
+            attenuation,
+            scattered_ray,
+        })
     }
 }
-
 
 #[derive(Clone)]
 pub struct Metal {
@@ -46,7 +54,10 @@ pub struct Metal {
 
 impl Metal {
     pub fn new(color: Color, fuzz: f64) -> Metal {
-        Metal { albedo: color, fuzz }
+        Metal {
+            albedo: color,
+            fuzz,
+        }
     }
 }
 
@@ -54,15 +65,20 @@ impl Material for Metal {
     fn scatter(&self, r_in: &Ray, p: &Point, normal: &Vector3, _: bool) -> Option<ScatterRecord> {
         let attenuation = self.albedo;
         let reflected = r_in.direction.unit().reflect(normal);
-        let scattered_ray = Ray::new(*p, reflected + self.fuzz * Vector3::new_random_in_unit_sphere());
+        let scattered_ray = Ray::new(
+            *p,
+            reflected + self.fuzz * Vector3::new_random_in_unit_sphere(),
+        );
         if scattered_ray.direction.dot(normal) > 0.0 {
-            Option::Some(ScatterRecord { attenuation, scattered_ray })
+            Option::Some(ScatterRecord {
+                attenuation,
+                scattered_ray,
+            })
         } else {
             Option::None
         }
     }
 }
-
 
 #[derive(Clone)]
 pub struct Dielectric {
@@ -76,7 +92,13 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, r_in: &Ray, p: &Vector3, normal: &Vector3, front_face: bool) -> Option<ScatterRecord> {
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        p: &Vector3,
+        normal: &Vector3,
+        front_face: bool,
+    ) -> Option<ScatterRecord> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let mut refraction_ratio = self.ir;
         if front_face {
@@ -94,10 +116,12 @@ impl Material for Dielectric {
         }
 
         let scattered_ray = Ray::new(*p, direction);
-        Option::Some(ScatterRecord { attenuation, scattered_ray })
+        Option::Some(ScatterRecord {
+            attenuation,
+            scattered_ray,
+        })
     }
 }
-
 
 fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
     // Use Schlick's approximation for reflectance.

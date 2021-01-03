@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 
 pub fn degrees_to_radians(degrees: f64) -> f64 {
     degrees * PI / 180.0
@@ -15,8 +15,12 @@ pub fn random_range(min: f64, max: f64) -> f64 {
 }
 
 pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
-    if x < min { return min; }
-    if x > max { return max; }
+    if x < min {
+        return min;
+    }
+    if x > max {
+        return max;
+    }
     x
 }
 

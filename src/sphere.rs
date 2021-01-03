@@ -11,7 +11,11 @@ pub struct Sphere<M: Material> {
 
 impl<M: Material> Sphere<M> {
     pub fn new(center: Point3, radius: f64, material: M) -> Sphere<M> {
-        Sphere { center, radius, material }
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -23,7 +27,9 @@ impl<M: Material> Hittable for Sphere<M> {
         let c = oc.length_squared() - self.radius * self.radius;
 
         let discriminant = half_b * half_b - a * c;
-        if discriminant < 0.0 { return Option::None; }
+        if discriminant < 0.0 {
+            return Option::None;
+        }
         let sqrtd = discriminant.sqrt();
 
         // Find the nearest root that lies in the acceptable range.
@@ -37,6 +43,12 @@ impl<M: Material> Hittable for Sphere<M> {
 
         let p = r.at(root);
         let outward_normal = (p - self.center) / self.radius;
-        Option::Some(HitRecord::from_normal(p, root, r, outward_normal, &self.material))
+        Option::Some(HitRecord::from_normal(
+            p,
+            root,
+            r,
+            outward_normal,
+            &self.material,
+        ))
     }
 }

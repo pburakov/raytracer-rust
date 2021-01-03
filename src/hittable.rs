@@ -12,13 +12,25 @@ pub struct HitRecord<'a> {
 }
 
 impl HitRecord<'_> {
-    pub fn from_normal<'a>(p: Point3, t: f64, r: &Ray, outward_normal: Vector3, material: &'a dyn Material) -> HitRecord<'a> {
+    pub fn from_normal<'a>(
+        p: Point3,
+        t: f64,
+        r: &Ray,
+        outward_normal: Vector3,
+        material: &'a dyn Material,
+    ) -> HitRecord<'a> {
         let front_face = r.direction.dot(&outward_normal) < 0.0;
         let mut normal = -outward_normal;
         if front_face {
             normal = outward_normal
         }
-        HitRecord { p, t, front_face, normal, material }
+        HitRecord {
+            p,
+            t,
+            front_face,
+            normal,
+            material,
+        }
     }
 }
 
