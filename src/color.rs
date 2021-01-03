@@ -3,7 +3,7 @@ use std::io::{Stdout, Write};
 use crate::util::clamp;
 use crate::vector3::Vector3 as Color;
 
-pub(crate) fn write_color(mut stdout: Stdout, pixel_color: Color, samples_per_pixel: u8) {
+pub fn write_color(mut stdout: Stdout, pixel_color: Color, samples_per_pixel: u8) {
     let mut r = pixel_color.x;
     let mut g = pixel_color.y;
     let mut b = pixel_color.z;

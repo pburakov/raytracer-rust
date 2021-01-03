@@ -5,20 +5,20 @@ use std::io::Write;
 use crate::camera::Camera;
 use crate::color::write_color;
 use crate::hittable::Hittable;
-use crate::hittable_list::HittableList;
+use crate::material::{Lambertian, Metal};
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::util::random;
-use crate::vector3::{Vector3 as Color, Vector3 as Point3, Vector3};
+use crate::vector3::{Vector3 as Color, Vector3 as Point3};
 
 mod ray;
 mod vector3;
 mod hittable;
 mod sphere;
-mod hittable_list;
 mod util;
 mod camera;
 mod color;
+mod material;
 
 // Image
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
@@ -29,9 +29,17 @@ const MAX_DEPTH: u8 = 50;
 
 fn main() {
     // World
-    let mut world = HittableList { objects: Vec::new() };
-    world.add_sphere(Sphere { center: Point3::new(0.0, 0.0, -1.0), radius: 0.5 });
-    world.add_sphere(Sphere { center: Point3::new(0.0, -100.5, -1.0), radius: 100.0 });
+    let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
+    let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
+    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
+
+    let world: Vec<Box<dyn Hittable>> = vec![
+        Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground.clone())),
+        Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center.clone())),
+        Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left.clone())),
+        Box::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right.clone())),
+    ];
 
     let camera = Camera::new();
 
@@ -57,15 +65,21 @@ fn main() {
     io::stderr().write_all(b"\nDone\n").unwrap();
 }
 
-fn ray_color(r: &Ray, world: &dyn Hittable, depth: u8) -> Color {
-    let rec = world.hit(r, 0.001, INFINITY);
+fn ray_color(r: &Ray, world: &Vec<Box<dyn Hittable>>, depth: u8) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if depth <= 0 {
         return Color::zero();
     }
-    if rec.is_some() {
-        let target = rec.unwrap().p + Vector3::random_in_hemisphere(&rec.unwrap().normal);
-        return 0.5 * ray_color(&Ray::new(rec.unwrap().p, target - rec.unwrap().p), world, depth - 1);
+    let hit_rec = world.hit(r, 0.001, INFINITY);
+    if hit_rec.is_some() {
+        let hit = hit_rec.unwrap();
+        let scatter_rec = hit.material.scatter(r, &hit.p, &hit.normal);
+        if scatter_rec.is_some() {
+            let scatter = scatter_rec.unwrap();
+            return scatter.attenuation * ray_color(&scatter.scattered_ray, world, depth - 1);
+        } else {
+            return Color::zero();
+        }
     }
     let unit_direction = r.direction.unit();
     let t = 0.5 * (unit_direction.y + 1.0);
