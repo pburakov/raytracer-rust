@@ -10,6 +10,34 @@ pub struct Vector3 {
 }
 
 impl Vector3 {
+    pub fn dot(&self, v: &Vector3) -> f64 {
+        self.x * v.x + self.y * v.y + self.z * v.z
+    }
+    pub fn length(&self) -> f64 {
+        self.length_squared().sqrt()
+    }
+    pub fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+    pub fn unit(&self) -> Vector3 {
+        self / self.length()
+    }
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+    pub fn reflect(&self, n: &Vector3) -> Vector3 {
+        self - 2.0 * self.dot(n) * n
+    }
+    pub fn refract(&self, n: &Vector3, etai_over_etat: f64) -> Vector3 {
+        let cos_theta = (-self).dot(n).min(1.0);
+        let r_out_perp = etai_over_etat * (self + cos_theta * n);
+        let r_out_parallel = -((1.0 - r_out_perp.length_squared()).abs().sqrt()) * n;
+        r_out_perp + r_out_parallel
+    }
+}
+
+impl Vector3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vector3 {
         Vector3 { x, y, z }
     }
@@ -41,28 +69,6 @@ impl Vector3 {
     }
 }
 
-impl Vector3 {
-    pub fn dot(&self, v: &Vector3) -> f64 {
-        self.x * v.x + self.y * v.y + self.z * v.z
-    }
-    pub fn length(&self) -> f64 {
-        self.length_squared().sqrt()
-    }
-    pub fn length_squared(&self) -> f64 {
-        self.x * self.x + self.y * self.y + self.z * self.z
-    }
-    pub fn unit(&self) -> Vector3 {
-        self / self.length()
-    }
-    pub fn near_zero(&self) -> bool {
-        let s = 1e-8;
-        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
-    }
-    pub fn reflect(&self, normal: &Vector3) -> Vector3 {
-        self - 2.0 * self.dot(normal) * normal
-    }
-}
-
 impl_op!(+ |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
 impl_op!(+ |a: Vector3, b: &Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
 impl_op!(+ |a: &Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
@@ -91,6 +97,8 @@ impl_op!(* |a: &Vector3, b: &Vector3| -> Vector3 { Vector3 {x: a.x*b.x, y: a.y*b
 
 impl_op!(* |t: f64, a: Vector3| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t} });
 impl_op!(* |t: f64, a: &Vector3| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t} });
+impl_op!(* |a: Vector3, t: f64| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t} });
+impl_op!(* |a: &Vector3, t: f64| -> Vector3 { Vector3 {x: a.x*t, y: a.y*t, z: a.z*t} });
 
 #[cfg(test)]
 mod tests {
@@ -120,5 +128,19 @@ mod tests {
         assert_eq!(Vector3::new(1.0, 0.0, 0.0), Vector3::new(1.0, 0.0, 0.0).unit());
         assert_eq!(Vector3::new(0.0, 1.0, 0.0), Vector3::new(0.0, 2.0, 0.0).unit());
         assert_eq!(Vector3::new(0.0, 0.0, 1.0), Vector3::new(0.0, 0.0, 3.0).unit());
+    }
+
+    #[test]
+    fn reflect() {
+        assert_eq!(Vector3::new(-1.0, 0.0, 0.0), Vector3::new(1.0, 0.0, 0.0).reflect(&Vector3::new(1.0, 0.0, 0.0)));
+        assert_eq!(Vector3::new(-3.0, -3.0, 0.0), Vector3::new(1.0, 1.0, 0.0).reflect(&Vector3::new(1.0, 1.0, 0.0)));
+        assert_eq!(Vector3::new(-5.0, -5.0, -5.0), Vector3::new(1.0, 1.0, 1.0).reflect(&Vector3::new(1.0, 1.0, 1.0)));
+    }
+
+    #[test]
+    fn refract() {
+        assert_eq!(Vector3::new(-1.0, 0.0, 0.0), Vector3::new(1.0, 0.0, 0.0).refract(&Vector3::new(1.0, 0.0, 0.0), 1.0));
+        assert_eq!(Vector3::new(-2.0, -2.0, 0.0), Vector3::new(1.0, 1.0, 0.0).refract(&Vector3::new(1.0, 1.0, 0.0), 1.0));
+        assert_eq!(Vector3::new(-7.545524207081868, -7.545524207081868, -7.545524207081868), Vector3::new(1.0, 1.0, 1.0).refract(&Vector3::new(1.0, 1.0, 1.0), 1.4));
     }
 }

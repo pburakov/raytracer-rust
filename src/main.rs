@@ -5,10 +5,10 @@ use std::io::Write;
 use crate::camera::Camera;
 use crate::color::write_color;
 use crate::hittable::Hittable;
-use crate::material::{Lambertian, Metal};
+use crate::material::{Dielectric, Lambertian, Metal};
 use crate::ray::Ray;
 use crate::sphere::Sphere;
-use crate::util::random;
+use crate::util::random_f64;
 use crate::vector3::{Vector3 as Color, Vector3 as Point3};
 
 mod ray;
@@ -30,14 +30,15 @@ const MAX_DEPTH: u8 = 50;
 fn main() {
     // World
     let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
-    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
-    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
+    let material_center = Lambertian::new(Color::new(0.1, 0.2, 0.5));
+    let material_left = Dielectric::new(1.5);
+    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 0.0);
 
     let world: Vec<Box<dyn Hittable>> = vec![
         Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground.clone())),
         Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center.clone())),
         Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left.clone())),
+        Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.4, material_left.clone())),
         Box::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right.clone())),
     ];
 
@@ -52,8 +53,8 @@ fn main() {
         for x in 0..IMAGE_WIDTH {
             let mut pixel_color = Color::zero();
             for _ in 0..SAMPLES_PER_PIXEL {
-                let u = (x as f64 + random()) / IMAGE_WIDTH as f64;
-                let v = (y as f64 + random()) / IMAGE_HEIGHT as f64;
+                let u = (x as f64 + random_f64()) / IMAGE_WIDTH as f64;
+                let v = (y as f64 + random_f64()) / IMAGE_HEIGHT as f64;
 
                 let r = camera.get_ray(u, v);
                 pixel_color += ray_color(&r, &world, MAX_DEPTH);
@@ -73,7 +74,7 @@ fn ray_color(r: &Ray, world: &Vec<Box<dyn Hittable>>, depth: u8) -> Color {
     let hit_rec = world.hit(r, 0.001, INFINITY);
     if hit_rec.is_some() {
         let hit = hit_rec.unwrap();
-        let scatter_rec = hit.material.scatter(r, &hit.p, &hit.normal);
+        let scatter_rec = hit.material.scatter(r, &hit.p, &hit.normal, hit.front_face);
         if scatter_rec.is_some() {
             let scatter = scatter_rec.unwrap();
             return scatter.attenuation * ray_color(&scatter.scattered_ray, world, depth - 1);

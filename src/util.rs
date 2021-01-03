@@ -6,7 +6,7 @@ pub fn degrees_to_radians(degrees: f64) -> f64 {
     degrees * PI / 180.0
 }
 
-pub fn random() -> f64 {
+pub fn random_f64() -> f64 {
     thread_rng().gen_range(0.0..1.0)
 }
 
@@ -22,12 +22,12 @@ pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::{clamp, random, random_range};
+    use crate::util::{clamp, random_f64, random_range};
 
     #[test]
     fn random_bounds() {
         for _ in 0..1000 {
-            let r = random();
+            let r = random_f64();
             assert_eq!(true, 0.0 <= r);
             assert_eq!(true, r < 1.0);
         }
