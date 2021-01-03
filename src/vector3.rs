@@ -35,6 +35,13 @@ impl Vector3 {
         let r_out_parallel = -((1.0 - r_out_perp.length_squared()).abs().sqrt()) * n;
         r_out_perp + r_out_parallel
     }
+    pub(crate) fn cross(&self, v: &Vector3) -> Vector3 {
+        Vector3 {
+            x: self.y * v.z - self.z * v.y,
+            y: self.z * v.x - self.x * v.z,
+            z: self.x * v.y - self.y * v.x,
+        }
+    }
 }
 
 impl Vector3 {
@@ -142,5 +149,11 @@ mod tests {
         assert_eq!(Vector3::new(-1.0, 0.0, 0.0), Vector3::new(1.0, 0.0, 0.0).refract(&Vector3::new(1.0, 0.0, 0.0), 1.0));
         assert_eq!(Vector3::new(-2.0, -2.0, 0.0), Vector3::new(1.0, 1.0, 0.0).refract(&Vector3::new(1.0, 1.0, 0.0), 1.0));
         assert_eq!(Vector3::new(-7.545524207081868, -7.545524207081868, -7.545524207081868), Vector3::new(1.0, 1.0, 1.0).refract(&Vector3::new(1.0, 1.0, 1.0), 1.4));
+    }
+
+    #[test]
+    fn cross() {
+        assert_eq!(Vector3::new(0.0, -1.0, 0.0), Vector3::new(1.0, 0.0, 0.0).cross(&Vector3::new(1.0, 0.0, 1.0)));
+        assert_eq!(Vector3::new(-2.0, 7.0, -4.0), Vector3::new(1.0, 2.0, 3.0).cross(&Vector3::new(3.0, 2.0, 2.0)));
     }
 }

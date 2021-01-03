@@ -9,7 +9,7 @@ use crate::material::{Dielectric, Lambertian, Metal};
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::util::random_f64;
-use crate::vector3::{Vector3 as Color, Vector3 as Point3};
+use crate::vector3::{Vector3 as Color, Vector3 as Point3, Vector3};
 
 mod ray;
 mod vector3;
@@ -38,11 +38,11 @@ fn main() {
         Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground.clone())),
         Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center.clone())),
         Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left.clone())),
-        Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.4, material_left.clone())),
+        Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.45, material_left.clone())),
         Box::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right.clone())),
     ];
 
-    let camera = Camera::new();
+    let camera = Camera::new(Point3::new(-2.0, 2.0, 1.0), Point3::new(0.0, 0.0, -1.0), Vector3::new(0.0, 1.0, 0.0), 20.0, ASPECT_RATIO);
 
     // Render
     io::stdout().write_fmt(format_args!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT)).unwrap();
