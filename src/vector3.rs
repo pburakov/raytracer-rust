@@ -1,6 +1,6 @@
 use auto_ops::*;
 
-use crate::util::random_range;
+use crate::util::{random_f64, random_range};
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Vector3 {
@@ -51,12 +51,15 @@ impl Vector3 {
     pub fn zero() -> Vector3 {
         Vector3::new(0.0, 0.0, 0.0)
     }
-    pub fn new_random(min: f64, max: f64) -> Vector3 {
+    pub fn new_random() -> Vector3 {
+        Vector3 { x: random_f64(), y: random_f64(), z: random_f64() }
+    }
+    pub fn new_random_range(min: f64, max: f64) -> Vector3 {
         Vector3 { x: random_range(min, max), y: random_range(min, max), z: random_range(min, max) }
     }
     pub fn new_random_in_unit_sphere() -> Vector3 {
         loop {
-            let p = Vector3::new_random(-1.0, 1.0);
+            let p = Vector3::new_random_range(-1.0, 1.0);
             if p.length_squared() >= 1.0 {
                 continue;
             }
