@@ -42,7 +42,14 @@ fn main() {
         Box::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right.clone())),
     ];
 
-    let camera = Camera::new(Point3::new(-2.0, 2.0, 1.0), Point3::new(0.0, 0.0, -1.0), Vector3::new(0.0, 1.0, 0.0), 20.0, ASPECT_RATIO);
+    // Camera
+    let look_from = Point3::new(3.0, 3.0, 2.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let v_up = Vector3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = (look_from - look_at).length();
+    let aperture = 2.0;
+
+    let camera = Camera::new(look_from, look_at, v_up, 20.0, ASPECT_RATIO, aperture, dist_to_focus);
 
     // Render
     io::stdout().write_fmt(format_args!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT)).unwrap();

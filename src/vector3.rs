@@ -74,6 +74,15 @@ impl Vector3 {
             -in_unit_sphere
         };
     }
+    pub fn new_random_in_unit_disk() -> Vector3 {
+        loop {
+            let p = Vector3::new(random_range(-1.0, 1.0), random_range(-1.0, 1.0), 0.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
+    }
 }
 
 impl_op!(+ |a: Vector3, b: Vector3| -> Vector3 { Vector3 {x: a.x+b.x, y: a.y+b.y, z: a.z+b.z} });
